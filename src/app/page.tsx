@@ -1,7 +1,9 @@
+import TopicsList from "@/components/temp/TopicsList";
+
 export default function Home() {
   return (
     <>
-      <div className="">codeCleanup</div>
+      <TopicsList />
     </>
   );
 }
