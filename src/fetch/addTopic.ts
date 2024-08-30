@@ -1,5 +1,3 @@
-import { BASE_URL } from "@/lib/config";
-
 export interface Topic {
   title: string;
   description: string;
@@ -9,7 +7,7 @@ export const addTopic = async (
   title: string,
   description: string,
 ): Promise<void> => {
-  const res = await fetch(`${BASE_URL}api/topics`, {
+  const res = await fetch(`${process.env.BASE_URL}api/topics`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

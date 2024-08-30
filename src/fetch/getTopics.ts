@@ -1,5 +1,3 @@
-import { BASE_URL } from "@/lib/config";
-
 export interface Topic {
   title: string;
   description: string;
@@ -7,7 +5,7 @@ export interface Topic {
 
 export const getTopics = async (): Promise<{ topics: Topic[] } | undefined> => {
   try {
-    const res = await fetch(`${BASE_URL}api/topics`, {
+    const res = await fetch(`${process.env.BASE_URL}api/topics`, {
       cache: "no-store",
     });
 
