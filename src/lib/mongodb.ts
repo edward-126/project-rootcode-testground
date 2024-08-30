@@ -7,7 +7,7 @@ const connectMongoDB = async () => {
       return;
     }
 
-    const mongoURI = process.env.MONGODB_URI as string;
+    const mongoURI = process.env.NEXT_PUBLIC_MONGODB_URI as string;
 
     if (!mongoURI) {
       throw new Error(

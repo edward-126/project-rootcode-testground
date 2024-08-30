@@ -5,7 +5,7 @@ export interface Topic {
 
 export const getTopics = async (): Promise<{ topics: Topic[] } | undefined> => {
   try {
-    const res = await fetch(`${process.env.BASE_URL}api/topics`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/topics`, {
       cache: "no-store",
     });
 
