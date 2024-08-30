@@ -1,10 +1,10 @@
-import { getTopics, Topic } from "@/data/topics";
 import { Edit } from "lucide-react";
 import Link from "next/link";
 import MaxWidthWrapper from "../shared/MaxWidthWrapper";
 import Spacer from "../shared/Spacer";
 import { Button } from "../ui/button";
 import RemoveBtn from "./RemoveBtn";
+import { getTopics } from "@/fetch/getTopics";
 
 const TopicsList = async () => {
   const data = await getTopics();
