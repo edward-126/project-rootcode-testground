@@ -16,7 +16,7 @@ const TopicsList = async () => {
       <MaxWidthWrapper className="*:mb-4">
         {topicData.map((topics, idx) => (
           <div
-            className="flex justify-between rounded-lg border border-border p-4"
+            className="flex flex-col justify-between gap-3 rounded-lg border border-border p-4 sm:flex-row sm:gap-0"
             key={idx}
           >
             <div className="">
@@ -24,7 +24,7 @@ const TopicsList = async () => {
               <small>{topics.description}</small>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex w-full items-center justify-end gap-4 sm:w-fit sm:justify-normal">
               <Link href="/editTopic/123">
                 <Button size="icon" variant="outline">
                   <Edit className="size-5" />
