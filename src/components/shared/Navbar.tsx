@@ -1,7 +1,7 @@
 import Link from "next/link";
 import React from "react";
-import MaxWidthWrapper from "./shared/MaxWidthWrapper";
-import { Button } from "./ui/button";
+import MaxWidthWrapper from "./MaxWidthWrapper";
+import { Button } from "../ui/button";
 
 const Navbar = () => {
   return (
