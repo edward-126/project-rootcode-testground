@@ -1,13 +1,21 @@
-import MaxWidthWrapper from "@/components/shared/MaxWidthWrapper";
-import Spacer from "@/components/shared/Spacer";
 import UpdateTopic from "@/components/temp/UpdateTopic";
+import { getTopicById } from "@/fetch/getTopicById";
 
-const page = () => {
+const Page = async ({ params }: { params: any }) => {
+  const { id } = params;
+  const data = await getTopicById(id);
+
+  if (!data?.topic) {
+    return <div>Topic not found</div>;
+  }
+
+  const { title, description } = data.topic;
+
   return (
     <>
-      <UpdateTopic />
+      <UpdateTopic id={id} title={title} description={description} />
     </>
   );
 };
 
-export default page;
+export default Page;

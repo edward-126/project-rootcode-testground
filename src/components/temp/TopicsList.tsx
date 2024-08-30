@@ -25,7 +25,7 @@ const TopicsList = async () => {
             </div>
 
             <div className="flex w-full items-center justify-end gap-4 sm:w-fit sm:justify-normal">
-              <Link href="/editTopic/123">
+              <Link href={`/editTopic/${topics._id}`}>
                 <Button size="icon" variant="outline">
                   <Edit className="size-5" />
                 </Button>
