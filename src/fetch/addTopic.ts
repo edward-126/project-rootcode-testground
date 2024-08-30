@@ -1,8 +1,3 @@
-export interface Topic {
-  title: string;
-  description: string;
-}
-
 export const addTopic = async (
   title: string,
   description: string,

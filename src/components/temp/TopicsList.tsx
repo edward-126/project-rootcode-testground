@@ -30,7 +30,7 @@ const TopicsList = async () => {
                   <Edit className="size-5" />
                 </Button>
               </Link>
-              <RemoveBtn />
+              <RemoveBtn id={topics._id} />
             </div>
           </div>
         ))}
