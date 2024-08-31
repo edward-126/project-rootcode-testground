@@ -17,7 +17,7 @@ const page = () => {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const { isAuthenticated, isLoading } = useKindeBrowserClient();
+  const { user, isLoading } = useKindeBrowserClient();
 
   if (isLoading)
     return (
@@ -28,7 +28,7 @@ const page = () => {
       </>
     );
 
-  if (!isAuthenticated) {
+  if (!user) {
     return (
       <>
         <div className="flex h-[calc(100vh-8.5rem-2px)] flex-col items-center justify-center gap-1">
