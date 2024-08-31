@@ -21,9 +21,10 @@ const TopicsList = async () => {
               className="flex flex-col justify-between gap-3 rounded-lg border border-border p-4 sm:flex-row sm:gap-0"
               key={idx}
             >
-              <div className="">
+              <div className="flex flex-col gap-1">
                 <h3>{topics.title}</h3>
                 <small>{topics.description}</small>
+                <small>{topics.userId}</small>
               </div>
 
               <div className="flex w-full items-center justify-end gap-4 sm:w-fit sm:justify-normal">

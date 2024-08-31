@@ -2,6 +2,7 @@ export interface Topic {
   _id: string;
   title: string;
   description: string;
+  userId: string;
 }
 
 export const getTopics = async (): Promise<{ topics: Topic[] } | undefined> => {
