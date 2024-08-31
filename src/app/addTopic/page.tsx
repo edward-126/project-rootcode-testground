@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import MaxWidthWrapper from "@/components/shared/MaxWidthWrapper";
 import Spacer from "@/components/shared/Spacer";
 import { Button } from "@/components/ui/button";
@@ -11,13 +12,18 @@ import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 const page = () => {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const { isAuthenticated, isLoading } = useKindeBrowserClient();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/api/auth/login");
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,43 +43,15 @@ const page = () => {
     }
   };
 
-  if (isLoading)
+  if (isLoading) {
     return (
-      <>
-        <div className="flex h-[calc(100vh-8.5rem-2px)] items-center justify-center">
-          <Loader2 className="size-16 animate-spin text-primary" />
-        </div>
-      </>
-    );
-
-  if (!isLoading && !isAuthenticated) {
-    return (
-      <>
-        <div className="flex h-[calc(100vh-8.5rem-2px)] flex-col items-center justify-center gap-1">
-          <h3>
-            Please{" "}
-            <Link
-              href="/api/auth/login"
-              className="text-primary transition-all duration-300 ease-in-out hover:text-primary/70"
-            >
-              Login
-            </Link>{" "}
-            or{" "}
-            <Link
-              href="/api/auth/register"
-              className="text-primary transition-all duration-300 ease-in-out hover:text-primary/70"
-            >
-              Signup
-            </Link>{" "}
-            to continue.
-          </h3>
-          <p>Have a great day!!</p>
-        </div>
-      </>
+      <div className="flex h-[calc(100vh-8.5rem-2px)] items-center justify-center">
+        <Loader2 className="size-16 animate-spin text-primary" />
+      </div>
     );
   }
 
-  if (!isLoading && isAuthenticated) {
+  if (isAuthenticated) {
     return (
       <>
         <Spacer />
@@ -105,6 +83,29 @@ const page = () => {
       </>
     );
   }
+
+  return (
+    <div className="flex h-[calc(100vh-8.5rem-2px)] flex-col items-center justify-center gap-1">
+      <h3>
+        Please{" "}
+        <Link
+          href="/api/auth/login"
+          className="text-primary transition-all duration-300 ease-in-out hover:text-primary/70"
+        >
+          Login
+        </Link>{" "}
+        or{" "}
+        <Link
+          href="/api/auth/register"
+          className="text-primary transition-all duration-300 ease-in-out hover:text-primary/70"
+        >
+          Signup
+        </Link>{" "}
+        to continue.
+      </h3>
+      <p>Have a great day!!</p>
+    </div>
+  );
 };
 
 export default page;
