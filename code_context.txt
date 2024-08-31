@@ -1,0 +1,904 @@
+// File: src/app/addTopic/page.tsx
+"use client";
+
+import MaxWidthWrapper from "@/components/shared/MaxWidthWrapper";
+import Spacer from "@/components/shared/Spacer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { addTopic } from "@/fetch/addTopic";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+const page = () => {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const router = useRouter();
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+
+    if (!title || !description) {
+      alert("Please fill in the input forms");
+      return;
+    }
+
+    try {
+      await addTopic(title, description);
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  return (
+    <>
+      <Spacer />
+      <MaxWidthWrapper>
+        <h2 className="mb-6">Add a new topic</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-0.5">
+            <Label>Topic Title</Label>
+            <Input onChange={(e) => setTitle(e.target.value)} value={title} />
+          </div>
+          <div className="space-y-0.5">
+            <Label>Topic Description</Label>
+            <Textarea
+              className="min-h-[150px]"
+              onChange={(e) => setDescription(e.target.value)}
+              value={description}
+            />
+          </div>
+          <Button type="submit">Add Topic</Button>
+        </form>
+      </MaxWidthWrapper>
+    </>
+  );
+};
+
+export default page;
+
+// File: src/app/api/auth/[kindeAuth]/route.js
+import { handleAuth } from "@kinde-oss/kinde-auth-nextjs/server";
+export const GET = handleAuth();
+
+// File: src/app/api/topics/[id]/route.ts
+import connectMongoDB from "@/lib/mongodb";
+import Topic from "@/models/topic";
+import { NextResponse } from "next/server";
+
+export async function PUT(request: any, { params }: { params: any }) {
+  const { id } = params;
+  const { newTitle: title, newDescription: description } = await request.json();
+  await connectMongoDB();
+  await Topic.findByIdAndUpdate(id, { title, description });
+  return NextResponse.json({ message: "Topic Updated" }, { status: 200 });
+}
+
+export async function GET(request: any, { params }: { params: any }) {
+  const { id } = params;
+  await connectMongoDB();
+  const topic = await Topic.findOne({ _id: id });
+  return NextResponse.json({ topic }, { status: 200 });
+}
+
+// File: src/app/api/topics/route.ts
+import connectMongoDB from "@/lib/mongodb";
+import Topic from "@/models/topic";
+import { NextResponse } from "next/server";
+
+export async function POST(request: any) {
+  const { title, description } = await request.json();
+  await connectMongoDB();
+  await Topic.create({ title, description });
+  return NextResponse.json({ message: "Topic Created" }, { status: 200 });
+}
+
+export async function GET() {
+  await connectMongoDB();
+  const topics = await Topic.find();
+  return NextResponse.json({ topics });
+}
+
+export async function DELETE(request: any) {
+  const id = request.nextUrl.searchParams.get("id");
+  await connectMongoDB();
+  await Topic.findByIdAndDelete(id);
+  return NextResponse.json({ message: "Topic Deleted" }, { status: 200 });
+}
+
+// File: src/app/dashboard/page.tsx
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { notFound } from "next/navigation";
+import React from "react";
+
+const page = async () => {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+
+  const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+
+  if (!user || user.email !== ADMIN_EMAIL) {
+    return notFound();
+  }
+
+  return (
+    <>
+      <div className="flex h-[calc(100vh-8.5rem-2px)] flex-col items-center justify-center gap-1">
+        <h1>DashBoard</h1>
+        <p>This is a protected route.</p>
+      </div>
+    </>
+  );
+};
+
+export default page;
+
+// File: src/app/editTopic/[id]/page.tsx
+import UpdateTopic from "@/components/temp/UpdateTopic";
+import { getTopicById } from "@/fetch/getTopicById";
+
+const Page = async ({ params }: { params: any }) => {
+  const { id } = params;
+  const data = await getTopicById(id);
+
+  if (!data?.topic) {
+    return <div>Topic not found</div>;
+  }
+
+  const { title, description } = data.topic;
+
+  return (
+    <>
+      <UpdateTopic id={id} title={title} description={description} />
+    </>
+  );
+};
+
+export default Page;
+
+// File: src/app/globals.css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 142.1 76.2% 36.3%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 142.1 76.2% 36.3%;
+    --radius: 1rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --background: 20 14.3% 4.1%;
+    --foreground: 0 0% 95%;
+    --card: 24 9.8% 10%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 142.1 70.6% 45.3%;
+    --primary-foreground: 144.9 80.4% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 12 6.5% 15.1%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 142.4 71.8% 29.2%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+h1 {
+  @apply scroll-m-20 text-4xl font-bold tracking-tight lg:text-5xl;
+}
+
+h2 {
+  @apply scroll-m-20 text-3xl font-semibold tracking-tight;
+}
+
+h3 {
+  @apply scroll-m-20 text-2xl font-semibold tracking-tight;
+}
+
+h4 {
+  @apply scroll-m-20 text-xl font-medium tracking-tight;
+}
+
+h5 {
+  @apply scroll-m-20 text-lg font-medium tracking-tight;
+}
+
+p {
+  @apply text-base leading-7;
+}
+
+small {
+  @apply text-sm leading-none;
+}
+
+.detail {
+  @apply text-xs leading-none;
+}
+
+// File: src/app/layout.tsx
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { cn } from "@/lib/utils";
+import Navbar from "@/components/shared/Navbar";
+import Footer from "@/components/shared/Footer";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "Project-Test-Rootcode",
+  description: "A test app created for testing the functionality of mongodb.",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" className="!scroll-smooth selection:bg-primary/40">
+      <body className={cn("antialiased", inter.className)}>
+        <Navbar />
+        <main className="relative flex min-h-[calc(100vh-5rem-2px)] flex-col">
+          <div className="flex-1 flex-grow">{children}</div>
+          <Footer />
+        </main>
+      </body>
+    </html>
+  );
+}
+
+// File: src/app/page.tsx
+import TopicsList from "@/components/temp/TopicsList";
+
+export default function Home() {
+  return (
+    <>
+      <TopicsList />
+    </>
+  );
+}
+
+// File: src/components/shared/Footer.tsx
+import Link from "next/link";
+import MaxWidthWrapper from "./MaxWidthWrapper";
+import { cn } from "@/lib/utils";
+
+const Footer = () => {
+  return (
+    <footer className="h-14 border-t border-border pt-5">
+      <MaxWidthWrapper className="mb-5 flex items-center justify-between font-light md:flex-row">
+        <div className="flex items-center gap-1 text-xs font-medium">
+          ©<span>{new Date().getFullYear()}</span>
+          <span>Project-Test-Rootcode</span>
+        </div>
+        <div className="text-xs font-normal">
+          <span>
+            Work of{" "}
+            <Link
+              href="https://its-thilina.vercel.app/"
+              target="_blank"
+              className="font-medium transition-all duration-300 ease-in-out hover:text-primary"
+            >
+              Thilina Rathnayaka
+            </Link>{" "}
+            &{" "}
+            <Link
+              href="https://www.ammaarilham.dev/"
+              target="_blank"
+              className="font-medium transition-all duration-300 ease-in-out hover:text-primary"
+            >
+              Ammaar Ilham
+            </Link>
+          </span>
+        </div>
+      </MaxWidthWrapper>
+    </footer>
+  );
+};
+
+export default Footer;
+
+// File: src/components/shared/MaxWidthWrapper.tsx
+import { cn } from "@/lib/utils";
+
+const MaxWidthWrapper = ({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) => {
+  return (
+    <div
+      className={cn(
+        "mx-auto w-full max-w-screen-xl px-2.5 md:px-20",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+};
+
+export default MaxWidthWrapper;
+
+// File: src/components/shared/Navbar.tsx
+import Link from "next/link";
+import React from "react";
+import MaxWidthWrapper from "./MaxWidthWrapper";
+import { Button, buttonVariants } from "../ui/button";
+import { ArrowRight } from "lucide-react";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+
+const Navbar = async () => {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+
+  const isAdmin = user?.email === process.env.ADMIN_EMAIL;
+
+  return (
+    <>
+      <nav className="sticky inset-x-0 top-0 z-[100] w-full border-b border-border bg-white/75 backdrop-blur transition-all">
+        <MaxWidthWrapper>
+          <div className="flex h-20 items-center justify-between">
+            <Link href="/" className="z-40 flex text-lg font-semibold">
+              Project-Test-<span className="text-green-600">RootCode</span>
+            </Link>
+            <div className="flex h-full items-center space-x-4">
+              {user ? (
+                <>
+                  <Button asChild variant={"ghost"}>
+                    <Link href="/api/auth/logout">Sign Out</Link>
+                  </Button>
+                  {isAdmin && (
+                    <Button asChild variant={"ghost"}>
+                      <Link href="/dashboard">Dashboard</Link>
+                    </Button>
+                  )}
+                  <div className="hidden h-8 w-px bg-border sm:block" />
+                  <Button asChild>
+                    <Link href="/addTopic">
+                      Add a Topic
+                      <ArrowRight className="ml-1.5 size-4" />
+                    </Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button asChild variant={"ghost"}>
+                    <Link href="/api/auth/register">Sign up</Link>
+                  </Button>
+
+                  <Button asChild variant={"ghost"}>
+                    <Link href="/api/auth/login">Login</Link>
+                  </Button>
+
+                  <div className="hidden h-8 w-px bg-border sm:block" />
+                  <Button asChild>
+                    <Link href="/addTopic">
+                      Add a Topic
+                      <ArrowRight className="ml-1.5 size-4" />
+                    </Link>
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </MaxWidthWrapper>
+      </nav>
+    </>
+  );
+};
+
+export default Navbar;
+
+// File: src/components/shared/Spacer.tsx
+import { cn } from "@/lib/utils";
+
+const Spacer = ({ className }: { className?: string }) => {
+  return (
+    <>
+      <div className={cn("h-12", className)}></div>
+    </>
+  );
+};
+
+export default Spacer;
+
+// File: src/components/temp/RemoveBtn.tsx
+"use client";
+
+import { Trash2 } from "lucide-react";
+import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
+import { deleteTopic } from "@/fetch/removeTopic";
+
+const RemoveBtn = ({ id }: { id: string }) => {
+  const router = useRouter();
+
+  const handleRemove = async () => {
+    const confirmed = confirm("Are you sure?");
+
+    if (confirmed) {
+      try {
+        await deleteTopic(id);
+        router.refresh();
+      } catch (error) {
+        console.error("Failed to delete the topic", error);
+      }
+    }
+  };
+
+  return (
+    <Button onClick={handleRemove} size="icon" variant="outline">
+      <Trash2 className="size-5" />
+    </Button>
+  );
+};
+
+export default RemoveBtn;
+
+// File: src/components/temp/TopicsList.tsx
+import { Edit } from "lucide-react";
+import Link from "next/link";
+import MaxWidthWrapper from "../shared/MaxWidthWrapper";
+import Spacer from "../shared/Spacer";
+import { Button } from "../ui/button";
+import RemoveBtn from "./RemoveBtn";
+import { getTopics } from "@/fetch/getTopics";
+
+const TopicsList = async () => {
+  const data = await getTopics();
+  const topicData = data?.topics ?? [];
+
+  return (
+    <>
+      <Spacer />
+      <MaxWidthWrapper className="*:mb-4">
+        <h2 className="">Topics list</h2>
+        <div className="mt-8 space-y-3">
+          {topicData.map((topics, idx) => (
+            <div
+              className="flex flex-col justify-between gap-3 rounded-lg border border-border p-4 sm:flex-row sm:gap-0"
+              key={idx}
+            >
+              <div className="">
+                <h3>{topics.title}</h3>
+                <small>{topics.description}</small>
+              </div>
+
+              <div className="flex w-full items-center justify-end gap-4 sm:w-fit sm:justify-normal">
+                <Link href={`/editTopic/${topics._id}`}>
+                  <Button size="icon" variant="outline">
+                    <Edit className="size-5" />
+                  </Button>
+                </Link>
+                <RemoveBtn id={topics._id} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </MaxWidthWrapper>
+    </>
+  );
+};
+
+export default TopicsList;
+
+// File: src/components/temp/UpdateTopic.tsx
+"use client";
+
+import MaxWidthWrapper from "@/components/shared/MaxWidthWrapper";
+import Spacer from "@/components/shared/Spacer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { updateTopic } from "@/fetch/updateTopic";
+
+const UpdateTopic = ({
+  id,
+  title,
+  description,
+}: {
+  id: string;
+  title: string;
+  description: string;
+}) => {
+  const router = useRouter();
+  const [newTitle, setNewTitle] = useState(title);
+  const [newDescription, setNewDescription] = useState(description);
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+
+    try {
+      await updateTopic(id, newTitle, newDescription);
+
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return (
+    <>
+      <Spacer />
+      <MaxWidthWrapper>
+        <h2 className="mb-6">Update/Edit a topic</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-0.5">
+            <Label>Topic Title</Label>
+            <Input
+              onChange={(e) => setNewTitle(e.target.value)}
+              value={newTitle}
+            />
+          </div>
+          <div className="space-y-0.5">
+            <Label>Topic Description</Label>
+            <Textarea
+              className="min-h-[150px]"
+              onChange={(e) => setNewDescription(e.target.value)}
+              value={newDescription}
+            />
+          </div>
+          <Button type="submit">Edit Topic</Button>
+        </form>
+      </MaxWidthWrapper>
+    </>
+  );
+};
+
+export default UpdateTopic;
+
+// File: src/components/ui/button.tsx
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+
+import { cn } from "@/lib/utils";
+
+const buttonVariants = cva(
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-300 ease-in-out hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-[1] disabled:pointer-events-none disabled:opacity-50",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive:
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline:
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  },
+);
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button";
+    return (
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    );
+  },
+);
+Button.displayName = "Button";
+
+export { Button, buttonVariants };
+
+// File: src/components/ui/input.tsx
+import * as React from "react";
+
+import { cn } from "@/lib/utils";
+
+export interface InputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {}
+
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, ...props }, ref) => {
+    return (
+      <input
+        type={type}
+        className={cn(
+          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-all duration-200 ease-in-out file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          className,
+        )}
+        ref={ref}
+        {...props}
+      />
+    );
+  },
+);
+Input.displayName = "Input";
+
+export { Input };
+
+// File: src/components/ui/label.tsx
+"use client"
+
+import * as React from "react"
+import * as LabelPrimitive from "@radix-ui/react-label"
+import { cva, type VariantProps } from "class-variance-authority"
+
+import { cn } from "@/lib/utils"
+
+const labelVariants = cva(
+  "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+)
+
+const Label = React.forwardRef<
+  React.ElementRef<typeof LabelPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> &
+    VariantProps<typeof labelVariants>
+>(({ className, ...props }, ref) => (
+  <LabelPrimitive.Root
+    ref={ref}
+    className={cn(labelVariants(), className)}
+    {...props}
+  />
+))
+Label.displayName = LabelPrimitive.Root.displayName
+
+export { Label }
+
+// File: src/components/ui/textarea.tsx
+import * as React from "react";
+
+import { cn } from "@/lib/utils";
+
+export interface TextareaProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+
+const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <textarea
+        className={cn(
+          "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-all duration-200 ease-in-out placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          className,
+        )}
+        ref={ref}
+        {...props}
+      />
+    );
+  },
+);
+Textarea.displayName = "Textarea";
+
+export { Textarea };
+
+// File: src/fetch/addTopic.ts
+export const addTopic = async (
+  title: string,
+  description: string,
+): Promise<void> => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/topics`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ title, description }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to create a topic");
+  }
+};
+
+// File: src/fetch/getTopicById.ts
+export const getTopicById = async (id: any): Promise<{ topic?: any }> => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}api/topics/${id}`,
+      {
+        cache: "no-store",
+      },
+    );
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch topic");
+    }
+
+    return res.json();
+  } catch (error) {
+    console.log("Error loading topic", error);
+    return {};
+  }
+};
+
+// File: src/fetch/getTopics.ts
+export interface Topic {
+  _id: string;
+  title: string;
+  description: string;
+}
+
+export const getTopics = async (): Promise<{ topics: Topic[] } | undefined> => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/topics`, {
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch topics");
+    }
+
+    return res.json();
+  } catch (error) {
+    console.log("Error loading topics", error);
+    return undefined;
+  }
+};
+
+// File: src/fetch/removeTopic.ts
+export const deleteTopic = async (id: string): Promise<void> => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}api/topics?id=${id}`,
+    {
+      method: "DELETE",
+    },
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to delete the topic");
+  }
+};
+
+// File: src/fetch/updateTopic.ts
+export const updateTopic = async (
+  id: string,
+  newTitle: string,
+  newDescription: string,
+): Promise<void> => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/topics/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ newTitle, newDescription }),
+      },
+    );
+
+    if (!res.ok) {
+      const errorDetails = await res.json();
+      throw new Error(`Failed to update topic: ${errorDetails.error}`);
+    }
+  } catch (error) {
+    console.error("Error updating topic:", error);
+    throw error;
+  }
+};
+
+// File: src/lib/config.ts
+export const BASE_URL =
+  "http://localhost:3000/" || "https://project-rootcode-testground.vercel.app/";
+
+// File: src/lib/mongodb.ts
+import mongoose from "mongoose";
+
+const connectMongoDB = async () => {
+  try {
+    if (mongoose.connection.readyState === 1) {
+      console.log("Already connected to MongoDB");
+      return;
+    }
+
+    const mongoURI = process.env.NEXT_PUBLIC_MONGODB_URI as string;
+
+    if (!mongoURI) {
+      throw new Error(
+        "MONGODB_URI is not defined in the environment variables.",
+      );
+    }
+
+    await mongoose.connect(mongoURI);
+    console.log("Connected to MongoDB");
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export default connectMongoDB;
+
+// File: src/lib/utils.ts
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+// File: src/models/topic.ts
+import mongoose, { Schema } from "mongoose";
+
+const topicSchema = new Schema(
+  {
+    title: String,
+    description: String,
+  },
+  {
+    timestamps: true,
+  },
+);
+
+const Topic = mongoose.models.Topic || mongoose.model("Topic", topicSchema);
+
+export default Topic;
+
