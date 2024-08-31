@@ -4,13 +4,13 @@ import { cn } from "@/lib/utils";
 
 const Footer = () => {
   return (
-    <footer>
+    <footer className="border-t border-border pt-5">
       <MaxWidthWrapper className="mb-5 flex items-center justify-between font-light md:flex-row">
-        <div className="flex items-center gap-1 text-sm font-medium">
+        <div className="flex items-center gap-1 text-xs font-medium">
           ©<span>{new Date().getFullYear()}</span>
           <span>Project-Test-Rootcode</span>
         </div>
-        <div className="text-sm font-normal">
+        <div className="text-xs font-normal">
           <span>
             Work of{" "}
             <Link
