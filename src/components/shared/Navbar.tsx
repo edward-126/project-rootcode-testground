@@ -30,6 +30,7 @@ const Navbar = async () => {
                       <Link href="/api/auth/logout">Dashboard</Link>
                     </Button>
                   )}
+                  <div className="hidden h-8 w-px bg-border sm:block" />
                   <Button asChild>
                     <Link href="/addTopic">
                       Add a Topic
@@ -47,7 +48,7 @@ const Navbar = async () => {
                     <Link href="/api/auth/login">Login</Link>
                   </Button>
 
-                  <div className="hidden h-8 w-px bg-zinc-200 sm:block" />
+                  <div className="hidden h-8 w-px bg-border sm:block" />
                   <Button asChild>
                     <Link href="/addTopic">
                       Add a Topic
