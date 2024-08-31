@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import MaxWidthWrapper from "@/components/shared/MaxWidthWrapper";
 import Spacer from "@/components/shared/Spacer";
 import { Button } from "@/components/ui/button";
@@ -18,12 +18,6 @@ const page = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const { isAuthenticated, isLoading } = useKindeBrowserClient();
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push("/api/auth/login");
-    }
-  }, [isAuthenticated, isLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,68 +37,67 @@ const page = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex h-[calc(100vh-8.5rem-2px)] items-center justify-center">
-        <Loader2 className="size-16 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (isAuthenticated) {
+  if (isLoading)
     return (
       <>
-        <Spacer />
-        <MaxWidthWrapper>
-          <h2 className="mb-6">Add a New Topic</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-0.5">
-              <Label htmlFor="title">Topic Title</Label>
-              <Input
-                id="title"
-                onChange={(e) => setTitle(e.target.value)}
-                value={title}
-                required
-              />
-            </div>
-            <div className="space-y-0.5">
-              <Label htmlFor="description">Topic Description</Label>
-              <Textarea
-                id="description"
-                className="min-h-[150px]"
-                onChange={(e) => setDescription(e.target.value)}
-                value={description}
-                required
-              />
-            </div>
-            <Button type="submit">Add Topic</Button>
-          </form>
-        </MaxWidthWrapper>
+        <div className="flex h-[calc(100vh-8.5rem-2px)] items-center justify-center">
+          <Loader2 className="size-16 animate-spin text-primary" />
+        </div>
       </>
     );
-  }
 
-  return (
-    <div className="flex h-[calc(100vh-8.5rem-2px)] flex-col items-center justify-center gap-1">
-      <h3>
-        Please{" "}
-        <Link
-          href="/api/auth/login"
-          className="text-primary transition-all duration-300 ease-in-out hover:text-primary/70"
-        >
-          Login
-        </Link>{" "}
-        or{" "}
-        <Link
-          href="/api/auth/register"
-          className="text-primary transition-all duration-300 ease-in-out hover:text-primary/70"
-        >
-          Signup
-        </Link>{" "}
-        to continue.
-      </h3>
-      <p>Have a great day!!</p>
-    </div>
+  return isAuthenticated ? (
+    <>
+      <Spacer />
+      <MaxWidthWrapper>
+        <h2 className="mb-6">Add a New Topic</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-0.5">
+            <Label htmlFor="title">Topic Title</Label>
+            <Input
+              id="title"
+              onChange={(e) => setTitle(e.target.value)}
+              value={title}
+              required
+            />
+          </div>
+          <div className="space-y-0.5">
+            <Label htmlFor="description">Topic Description</Label>
+            <Textarea
+              id="description"
+              className="min-h-[150px]"
+              onChange={(e) => setDescription(e.target.value)}
+              value={description}
+              required
+            />
+          </div>
+          <Button type="submit">Add Topic</Button>
+        </form>
+      </MaxWidthWrapper>
+    </>
+  ) : (
+    <>
+      <div className="flex h-[calc(100vh-8.5rem-2px)] flex-col items-center justify-center gap-1">
+        <h3>
+          Please{" "}
+          <Link
+            href="/api/auth/login"
+            className="text-primary transition-all duration-300 ease-in-out hover:text-primary/70"
+          >
+            Login
+          </Link>{" "}
+          or{" "}
+          <Link
+            href="/api/auth/register"
+            className="text-primary transition-all duration-300 ease-in-out hover:text-primary/70"
+          >
+            Signup
+          </Link>{" "}
+          to continue.
+        </h3>
+        <p>Have a great day!!</p>
+      </div>
+    </>
   );
 };
 
