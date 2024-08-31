@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 const Footer = () => {
   return (
-    <footer className="border-t border-border pt-5">
+    <footer className="h-14 border-t border-border pt-5">
       <MaxWidthWrapper className="mb-5 flex items-center justify-between font-light md:flex-row">
         <div className="flex items-center gap-1 text-xs font-medium">
           ©<span>{new Date().getFullYear()}</span>

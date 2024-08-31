@@ -27,7 +27,7 @@ const Navbar = async () => {
                   </Button>
                   {isAdmin && (
                     <Button asChild variant={"ghost"}>
-                      <Link href="/api/auth/logout">Dashboard</Link>
+                      <Link href="/dashboard">Dashboard</Link>
                     </Button>
                   )}
                   <div className="hidden h-8 w-px bg-border sm:block" />
